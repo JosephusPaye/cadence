@@ -6,11 +6,14 @@ const ROW_CLAP = 1;
 const ROW_KICK = 2;
 const SILENT_NOTE = 0;
 
+const instruments = [cymbal, clap, kick];
+
 class AudioNode {
-  constructor(row, col, pitch) {
+  constructor(row, col, note, duration) {
     this.row = row;
     this.col = col;
-    this.pitch = pitch;
+    this.note = note;
+    this.duration = duration;
     this.on = false;
   }
 }
@@ -30,8 +33,8 @@ export class Drums {
     for (let i = 0; i < width; i++) {
       const column = [];
       for (let j = 0; j < this.height; j++) {
-        const sound = j === ROW_KICK ? 'D1' : '16n';
-        const node = new AudioNode(j, i, sound);
+        const { note, duration } = instruments[j];
+        const node = new AudioNode(j, i, note, duration);
         column.push(node);
       }
       grid.push(column);
@@ -57,18 +60,17 @@ export class Drums {
 
   playCell(col, row) {
     const cell = this.getCell(col, row);
-    const sound = row == ROW_KICK ? kick : row == ROW_CLAP ? clap : cymbal;
+    const { synth } = instruments[row];
 
-    if (sound === kick) {
-      sound.triggerAttackRelease(cell.pitch, '16n');
+    if (cell.note) {
+      synth.triggerAttackRelease(cell.note, cell.duration);
     } else {
-      sound.triggerAttackRelease('16n');
+      synth.triggerAttackRelease(cell.duration);
     }
   }
 
   toggleCell(col, row) {
     const cell = this.getCell(col, row);
-
     cell.on = !cell.on;
 
     if (cell.on) {
@@ -81,25 +83,29 @@ export class Drums {
   toggleCellWithinSequence(col, row) {
     if (row == ROW_KICK) {
       this.kicks._events[col].value =
-        this.kicks._events[col].value === SILENT_NOTE ? 'D1' : SILENT_NOTE;
+        this.kicks._events[col].value === SILENT_NOTE ? kick.note : SILENT_NOTE;
     } else if (row == ROW_CLAP) {
       this.claps._events[col].value =
-        this.claps._events[col].value === SILENT_NOTE ? '16n' : SILENT_NOTE;
+        this.claps._events[col].value === SILENT_NOTE
+          ? clap.duration
+          : SILENT_NOTE;
     } else if (row == ROW_CYMBAL) {
       this.cymbals._events[col].value =
-        this.cymbals._events[col].value === SILENT_NOTE ? '16n' : SILENT_NOTE;
+        this.cymbals._events[col].value === SILENT_NOTE
+          ? cymbal.duration
+          : SILENT_NOTE;
     }
   }
 
   makeKickSequence() {
     const kicks = this.grid.map(column => {
       const node = column[ROW_KICK];
-      return node.on ? node.pitch : SILENT_NOTE;
+      return node.on ? node.note : SILENT_NOTE;
     });
     return new Tone.Sequence(
       function(time, note) {
         if (note !== SILENT_NOTE) {
-          kick.triggerAttackRelease(note, '16n');
+          kick.synth.triggerAttackRelease(note, kick.duration, time);
         }
       },
       kicks,
@@ -110,12 +116,12 @@ export class Drums {
   makeClapSequence() {
     const claps = this.grid.map(column => {
       const node = column[ROW_CLAP];
-      return node.on ? node.pitch : SILENT_NOTE;
+      return node.on ? node.duration : SILENT_NOTE;
     });
     return new Tone.Sequence(
       function(time, note) {
         if (note !== SILENT_NOTE) {
-          clap.triggerAttackRelease('16n');
+          clap.synth.triggerAttackRelease(clap.duration, time);
         }
       },
       claps,
@@ -126,12 +132,12 @@ export class Drums {
   makeCymbalSequence() {
     let cymbals = this.grid.map(column => {
       const node = column[ROW_CYMBAL];
-      return node.on ? node.pitch : SILENT_NOTE;
+      return node.on ? node.duration : SILENT_NOTE;
     });
     return new Tone.Sequence(
       function(time, note) {
         if (note !== SILENT_NOTE) {
-          cymbal.triggerAttackRelease('16n');
+          cymbal.synth.triggerAttackRelease(cymbal.duration);
         }
       },
       cymbals,
