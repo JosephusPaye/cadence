@@ -1,9 +1,9 @@
 <template>
   <div id="app" class="w-screen h-screen bg-gray-900 py-24 px-16">
     <div class="flex mb-2">
-      <Button @click.native="togglePlayback" color="primary">{{
-        playing ? 'Stop' : 'Start'
-      }}</Button>
+      <Button @click.native="togglePlayback" color="primary">
+        {{ playing ? 'Stop' : 'Start' }}
+      </Button>
       <!-- <Button class="ml-2">Tempo</Button> -->
       <Button class="ml-auto" @click.native="clearPattern">Clear</Button>
     </div>
@@ -54,6 +54,17 @@ export default {
         [0, 0, 0], // [0, 1, 0],
       ]),
     };
+  },
+  mounted() {
+    document.addEventListener(
+      'click',
+      () => {
+        if (Tone.context.state !== 'running') {
+          Tone.context.resume();
+        }
+      },
+      { once: true }
+    );
   },
   methods: {
     makePattern(description) {
