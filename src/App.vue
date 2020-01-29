@@ -1,13 +1,30 @@
 <template>
-  <div id="app" class="w-screen h-screen bg-gray-900 py-24 px-16">
-    <div class="relative">
+  <div id="app">
+    <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click.native="togglePlayback" color="primary">{{
+        <Button @click="togglePlayback" color="primary">{{
           playing ? 'Stop' : 'Start'
         }}</Button>
-        <!-- <Button class="ml-2">Tempo</Button> -->
-        <Button class="ml-auto" @click.native="clearPattern">Clear</Button>
+        <Button
+          class="ml-2"
+          :toggled="headerControl === 'tempo'"
+          @click="toggleHeaderControl('tempo')"
+          >Tempo</Button
+        >
+        <Button
+          class="ml-2"
+          :toggled="headerControl === 'instruments'"
+          @click="toggleHeaderControl('instruments')"
+          >Instruments</Button
+        >
+        <Button class="ml-auto" @click="clearPattern">Clear</Button>
       </div>
+      <TempoControl v-model="tempo" v-if="headerControl === 'tempo'" />
+      <InstrumentsControl
+        v-else-if="headerControl === 'instruments'"
+        :lanes="lanes"
+        @toggle="toggleLane"
+      />
       <Grid class="mx-auto" :lanes="lanes" @toggle-note="toggleNote" />
       <div
         v-if="loading"
@@ -26,6 +43,8 @@ import { Drums } from './modules/drums';
 import { makeLanes, defaultBeat } from './modules/data';
 import Button from './components/Button.vue';
 import Grid from './components/Grid.vue';
+import TempoControl from './components/TempoControl.vue';
+import InstrumentsControl from './components/InstrumentsControl.vue';
 
 export default {
   name: 'app',
@@ -33,14 +52,24 @@ export default {
   components: {
     Button,
     Grid,
+    InstrumentsControl,
+    TempoControl,
   },
 
   data() {
     return {
       loading: true,
       playing: false,
+      tempo: 120,
+      headerControl: 'none',
       lanes: makeLanes(defaultBeat),
     };
+  },
+
+  watch: {
+    tempo(newTempo) {
+      Tone.Transport.bpm.value = newTempo;
+    },
   },
 
   created() {
@@ -97,6 +126,19 @@ export default {
         this.drums.playNote(note);
       }
     },
+
+    toggleHeaderControl(control) {
+      if (this.headerControl === control) {
+        this.headerControl = 'none';
+      } else {
+        this.headerControl = control;
+      }
+    },
+
+    toggleLane(lane) {
+      lane.enabled = !lane.enabled;
+      this.drums.toggleLane(lane);
+    },
   },
 };
 </script>
@@ -104,9 +146,9 @@ export default {
 <style>
 @import './assets/tailwind.css';
 
-#app {
+body {
   color: rgba(0, 0, 0, 0.87);
-  @apply text-base;
+  @apply text-base bg-gray-900 py-16 px-16;
 }
 
 .js-focus-visible :focus:not(.focus-visible) {

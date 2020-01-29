@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col p-2 bg-gray-800">
     <Lane
-      v-for="(lane, index) in lanes"
+      v-for="(lane, index) in enabledLanes"
       :key="index"
       :lane="lane"
       :offset="index"
@@ -15,12 +15,19 @@ import Lane from './Lane.vue';
 
 export default {
   name: 'Grid',
-  components: {
-    Lane,
-  },
+
+  components: { Lane },
+
   props: {
     lanes: Array,
   },
+
+  computed: {
+    enabledLanes() {
+      return this.lanes.filter(lane => lane.enabled);
+    },
+  },
+
   methods: {
     toggleNote(note) {
       this.$emit('toggle-note', note);

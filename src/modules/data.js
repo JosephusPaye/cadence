@@ -1,9 +1,24 @@
-export function makeLanes({ patterns, laneOrder }) {
+import { camelToSnakeCase } from './util';
+
+const allInstruments = [
+  'ride',
+  'openHat',
+  'closedHat',
+  'rim',
+  'clap',
+  'snare',
+  'tom',
+  'kick',
+];
+
+export function makeLanes({ patterns, instruments }) {
   return Object.keys(patterns)
     .map(laneKey => {
       return {
         name: laneKey,
-        order: laneOrder.indexOf(laneKey),
+        prettyName: camelToSnakeCase(laneKey, ' '),
+        order: allInstruments.indexOf(laneKey),
+        enabled: instruments.includes(laneKey),
         notes: patterns[laneKey].map((noteValue, offset) => {
           return {
             lane: laneKey,
@@ -27,23 +42,5 @@ export const defaultBeat = {
     tom: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     kick: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
   },
-  laneOrder: [
-    'ride',
-    'openHat',
-    'closedHat',
-    'rim',
-    'clap',
-    'snare',
-    'tom',
-    'kick',
-  ],
-};
-
-export const blankBeat = {
-  patterns: {
-    clap: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    kick: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  },
-  laneOrder: ['clap', 'snare', 'kick'],
+  instruments: ['ride', 'openHat', 'closedHat', 'clap', 'snare', 'tom', 'kick'],
 };

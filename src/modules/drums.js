@@ -56,6 +56,10 @@ export class Drums {
     this.players.get(note.lane).start();
   }
 
+  toggleLane(lane) {
+    this.sequences.get(lane.name).mute = !lane.enabled;
+  }
+
   dispose() {
     this.sequences.forEach(sequence => sequence.dispose());
     this.players.dispose();
