@@ -8,7 +8,7 @@
         <!-- <Button class="ml-2">Tempo</Button> -->
         <Button class="ml-auto" @click.native="clearPattern">Clear</Button>
       </div>
-      <Grid class="mx-auto" :sequence="sequence" @toggle-note="toggleNote" />
+      <Grid class="mx-auto" :lanes="lanes" @toggle-note="toggleNote" />
       <div
         v-if="loading"
         class="absolute left-0 top-0 w-full h-full bg-gray-700 opacity-75 text-white flex items-center justify-center text-xl"
@@ -23,40 +23,32 @@
 import 'focus-visible';
 import Tone from 'tone';
 import { Drums } from './modules/drums';
+import { makeLanes, defaultBeat } from './modules/data';
 import Button from './components/Button.vue';
 import Grid from './components/Grid.vue';
 
 export default {
   name: 'app',
+
   components: {
     Button,
     Grid,
   },
+
   data() {
-    const sequenceToLane = {
-      clap: 0,
-      snare: 1,
-      kick: 2,
-    };
     return {
       loading: true,
       playing: false,
-      sequenceToLane,
-      sequence: this.makeSequence({
-        lanes: Object.keys(sequenceToLane),
-        patterns: [
-          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-          [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-        ],
-      }),
+      lanes: makeLanes(defaultBeat),
     };
   },
+
   created() {
-    this.drums = new Drums(this.sequence, this.sequenceToLane, () => {
+    this.drums = new Drums(this.lanes, () => {
       this.loading = false;
     });
   },
+
   mounted() {
     document.addEventListener(
       'click',
@@ -68,22 +60,8 @@ export default {
       { once: true }
     );
   },
-  methods: {
-    makeSequence(data) {
-      return data.patterns.map((lanePattern, laneIndex) => {
-        return {
-          name: data.lanes[laneIndex],
-          notes: lanePattern.map((noteValue, offset) => {
-            return {
-              lane: data.lanes[laneIndex],
-              offset,
-              on: Boolean(noteValue),
-            };
-          }),
-        };
-      });
-    },
 
+  methods: {
     start() {
       this.playing = true;
       Tone.Transport.start();
@@ -106,7 +84,7 @@ export default {
 
     clearPattern() {
       this.stop();
-      for (const lane of this.sequence) {
+      for (const lane of this.lanes) {
         for (const note of lane.notes) {
           note.on = false;
         }
@@ -115,7 +93,7 @@ export default {
 
     toggleNote(note) {
       note.on = !note.on;
-      if (note.on && Tone.Transport.state === 'stopped') {
+      if (note.on && Tone.Transport.state !== 'started') {
         this.drums.playNote(note);
       }
     },

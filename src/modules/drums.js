@@ -3,23 +3,32 @@ import Tone from 'tone';
 window.Tone = Tone;
 
 export class Drums {
-  constructor(sequence, sequenceToLane, onLoad) {
-    this.claps = this.makeSequence(sequence[sequenceToLane.clap]);
-    this.snares = this.makeSequence(sequence[sequenceToLane.snare]);
-    this.kicks = this.makeSequence(sequence[sequenceToLane.kick]);
+  constructor(lanes, onLoad) {
+    this.initializeSequences(lanes);
     this.initializePlayers(onLoad);
+  }
+
+  initializeSequences(lanes) {
+    this.sequences = new Map();
+    lanes.forEach(lane => {
+      this.sequences.set(lane.name, this.makeSequence(lane));
+    });
   }
 
   initializePlayers(onLoad) {
     this.players = new Tone.Players(
       {
-        kick: '/samples/kick.ogg',
-        snare: '/samples/snare.ogg',
         clap: '/samples/clap.ogg',
+        closedHat: '/samples/closed-hat.ogg',
+        kick: '/samples/kick.ogg',
+        openHat: '/samples/open-hat.ogg',
+        ride: '/samples/ride.ogg',
+        rim: '/samples/rim.ogg',
+        snare: '/samples/snare.ogg',
+        tom: '/samples/tom.ogg',
       },
       onLoad
     ).toMaster();
-    window.players = this.players;
   }
 
   makeSequence(lane) {
@@ -35,15 +44,11 @@ export class Drums {
   }
 
   start() {
-    this.kicks.start();
-    this.claps.start();
-    this.snares.start();
+    this.sequences.forEach(sequence => sequence.start());
   }
 
   stop() {
-    this.kicks.stop();
-    this.claps.stop();
-    this.snares.stop();
+    this.sequences.forEach(sequence => sequence.stop());
     this.players.stopAll();
   }
 
@@ -52,9 +57,7 @@ export class Drums {
   }
 
   dispose() {
-    this.kicks.dispose();
-    this.claps.dispose();
-    this.snares.dispose();
+    this.sequences.forEach(sequence => sequence.dispose());
     this.players.dispose();
   }
 }

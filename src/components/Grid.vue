@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col p-2 bg-gray-800">
     <Lane
-      v-for="(lane, index) in sequence"
+      v-for="(lane, index) in lanes"
       :key="index"
       :lane="lane"
       :offset="index"
@@ -19,7 +19,7 @@ export default {
     Lane,
   },
   props: {
-    sequence: Array,
+    lanes: Array,
   },
   methods: {
     toggleNote(note) {

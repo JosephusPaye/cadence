@@ -17,7 +17,7 @@ export default {
     classes() {
       const { on, offset } = this.note;
       return [
-        offset === 0 ? 'ml-0' : offset % 4 === 0 ? 'ml-2' : 'ml-1',
+        offset % 4 === 0 ? 'ml-2' : 'ml-1',
         on ? 'bg-blue-400' : 'bg-gray-700',
       ];
     },
