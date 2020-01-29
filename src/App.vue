@@ -1,13 +1,21 @@
 <template>
   <div id="app" class="w-screen h-screen bg-gray-900 py-24 px-16">
-    <div class="flex mb-2">
-      <Button @click.native="togglePlayback" color="primary">
-        {{ playing ? 'Stop' : 'Start' }}
-      </Button>
-      <!-- <Button class="ml-2">Tempo</Button> -->
-      <Button class="ml-auto" @click.native="clearPattern">Clear</Button>
+    <div class="relative">
+      <div class="flex mb-2">
+        <Button @click.native="togglePlayback" color="primary">{{
+          playing ? 'Stop' : 'Start'
+        }}</Button>
+        <!-- <Button class="ml-2">Tempo</Button> -->
+        <Button class="ml-auto" @click.native="clearPattern">Clear</Button>
+      </div>
+      <Grid class="mx-auto" :sequence="sequence" @toggle-note="toggleNote" />
+      <div
+        v-if="loading"
+        class="absolute left-0 top-0 w-full h-full bg-gray-700 opacity-75 text-white flex items-center justify-center text-xl"
+      >
+        Loading...
+      </div>
     </div>
-    <Grid class="mx-auto" :sequence="sequence" @toggle-note="toggleNote" />
   </div>
 </template>
 
@@ -31,6 +39,7 @@ export default {
       kick: 2,
     };
     return {
+      loading: true,
       playing: false,
       sequenceToLane,
       sequence: this.makeSequence({
@@ -44,7 +53,9 @@ export default {
     };
   },
   created() {
-    this.drums = new Drums(this.sequence, this.sequenceToLane);
+    this.drums = new Drums(this.sequence, this.sequenceToLane, () => {
+      this.loading = false;
+    });
   },
   mounted() {
     document.addEventListener(

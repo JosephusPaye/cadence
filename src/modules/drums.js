@@ -1,4 +1,3 @@
-// import instruments from './synth.js';
 import Tone from 'tone';
 
 window.Tone = Tone;
