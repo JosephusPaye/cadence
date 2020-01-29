@@ -1,6 +1,6 @@
 <template>
   <button
-    class="w-12 h-8 font-mono inline-flex items-center justify-center cursor-pointer"
+    class="w-12 h-8 inline-flex items-center justify-center cursor-pointer"
     :class="classes"
     @click="toggle"
   ></button>
@@ -8,23 +8,23 @@
 
 <script>
 export default {
-  name: 'Cell',
+  name: 'Note',
   props: {
-    cell: Object,
+    note: Object,
+    offset: Number,
   },
   computed: {
     classes() {
-      const { x, y, on } = this.cell;
+      const { on, offset } = this.note;
       return [
-        x === 0 ? 'ml-0' : x % 4 === 0 ? 'ml-2' : 'ml-1',
-        y === 0 ? 'mt-0' : 'mt-1',
+        offset === 0 ? 'ml-0' : offset % 4 === 0 ? 'ml-2' : 'ml-1',
         on ? 'bg-blue-400' : 'bg-gray-700',
       ];
     },
   },
   methods: {
     toggle() {
-      this.$emit('toggle', this.cell);
+      this.$emit('toggle', this.note);
     },
   },
 };

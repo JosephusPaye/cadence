@@ -1,30 +1,29 @@
 <template>
-  <div class="flex p-2 bg-gray-800">
-    <Column
-      v-for="(cells, index) in pattern"
+  <div class="flex flex-col p-2 bg-gray-800">
+    <Lane
+      v-for="(lane, index) in sequence"
       :key="index"
-      :cells="cells"
-      @toggle-cell="toggleCell"
+      :lane="lane"
+      :offset="index"
+      @toggle-note="toggleNote"
     />
   </div>
 </template>
 
 <script>
-import Column from './Column.vue';
+import Lane from './Lane.vue';
 
 export default {
-  name: 'Cell',
+  name: 'Grid',
   components: {
-    Column,
+    Lane,
   },
   props: {
-    width: Number,
-    height: Number,
-    pattern: Array,
+    sequence: Array,
   },
   methods: {
-    toggleCell(cell) {
-      this.$emit('toggle-cell', cell);
+    toggleNote(note) {
+      this.$emit('toggle-note', note);
     },
   },
 };

@@ -26,7 +26,7 @@ export const clap = {
   duration: '16n',
 };
 
-export const cymbal = {
+export const snare = {
   synth: new NoiseSynth({
     noise: {
       type: 'white',
@@ -44,4 +44,10 @@ export const cymbal = {
   }).toMaster(),
   note: null,
   duration: '16n',
+};
+
+export default {
+  kick,
+  clap,
+  snare,
 };

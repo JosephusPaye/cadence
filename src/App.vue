@@ -1,19 +1,13 @@
 <template>
   <div id="app" class="w-screen h-screen bg-gray-900 py-24 px-16">
     <div class="flex mb-2">
-      <Button @click.native="togglePlayback" color="primary">
-        {{ playing ? 'Stop' : 'Start' }}
-      </Button>
+      <Button @click.native="togglePlayback" color="primary">{{
+        playing ? 'Stop' : 'Start'
+      }}</Button>
       <!-- <Button class="ml-2">Tempo</Button> -->
       <Button class="ml-auto" @click.native="clearPattern">Clear</Button>
     </div>
-    <Grid
-      class="mx-auto"
-      :width="16"
-      :height="1"
-      :pattern="pattern"
-      @toggle-cell="toggleCell"
-    />
+    <Grid class="mx-auto" :sequence="sequence" @toggle-note="toggleNote" />
   </div>
 </template>
 
@@ -24,8 +18,6 @@ import { Drums } from './modules/drums';
 import Button from './components/Button.vue';
 import Grid from './components/Grid.vue';
 
-const drums = new Drums(16);
-
 export default {
   name: 'app',
   components: {
@@ -33,27 +25,26 @@ export default {
     Grid,
   },
   data() {
+    const sequenceToLane = {
+      clap: 0,
+      snare: 1,
+      kick: 2,
+    };
     return {
       playing: false,
-      pattern: this.makePattern([
-        [0, 0, 0], // [1, 0, 1],
-        [0, 0, 0], // [0, 1, 0],
-        [0, 0, 0], // [1, 0, 1],
-        [0, 0, 0], // [0, 1, 0],
-        [0, 0, 0], // [1, 0, 1],
-        [0, 0, 0], // [0, 1, 0],
-        [0, 0, 0], // [1, 0, 1],
-        [0, 0, 0], // [0, 1, 0],
-        [0, 0, 0], // [1, 0, 1],
-        [0, 0, 0], // [0, 1, 0],
-        [0, 0, 0], // [1, 0, 1],
-        [0, 0, 0], // [0, 1, 0],
-        [0, 0, 0], // [1, 0, 1],
-        [0, 0, 0], // [0, 1, 0],
-        [0, 0, 0], // [1, 0, 1],
-        [0, 0, 0], // [0, 1, 0],
-      ]),
+      sequenceToLane,
+      sequence: this.makeSequence({
+        lanes: Object.keys(sequenceToLane),
+        patterns: [
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+          [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        ],
+      }),
     };
+  },
+  created() {
+    this.drums = new Drums(this.sequence, this.sequenceToLane);
   },
   mounted() {
     document.addEventListener(
@@ -67,11 +58,18 @@ export default {
     );
   },
   methods: {
-    makePattern(description) {
-      return description.map((column, x) => {
-        return column.map((cell, y) => {
-          return { on: Boolean(cell), x, y };
-        });
+    makeSequence(data) {
+      return data.patterns.map((lanePattern, laneIndex) => {
+        return {
+          name: data.lanes[laneIndex],
+          notes: lanePattern.map((noteValue, offset) => {
+            return {
+              lane: data.lanes[laneIndex],
+              offset,
+              on: Boolean(noteValue),
+            };
+          }),
+        };
       });
     },
 
@@ -79,25 +77,33 @@ export default {
       this.playing = !this.playing;
       if (this.playing) {
         Tone.Transport.start();
-        drums.startSequences();
+        this.drums.start();
       } else {
         Tone.Transport.pause();
-        drums.stopSequences();
+        this.drums.stop();
       }
     },
 
     clearPattern() {
-      for (const column of this.pattern) {
-        for (const cell of column) {
-          cell.on = false;
+      for (const lane of this.sequence) {
+        for (const note of lane.notes) {
+          note.on = false;
         }
       }
+      this.drums.clear();
     },
 
-    toggleCell(cell) {
-      console.log('toggling cell', cell.x, cell.y, cell.on, '=>', !cell.on);
-      cell.on = !cell.on;
-      drums.toggleCell(cell.x, cell.y);
+    toggleNote(note) {
+      console.log(
+        'toggling note',
+        note.lane,
+        note.offset,
+        note.on,
+        '=>',
+        !note.on
+      );
+      note.on = !note.on;
+      this.drums.toggleNote(note);
     },
   },
 };
