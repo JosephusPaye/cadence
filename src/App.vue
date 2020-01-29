@@ -1,9 +1,9 @@
 <template>
   <div id="app" class="w-screen h-screen bg-gray-900 py-24 px-16">
     <div class="flex mb-2">
-      <Button @click.native="togglePlayback" color="primary">{{
-        playing ? 'Stop' : 'Start'
-      }}</Button>
+      <Button @click.native="togglePlayback" color="primary">
+        {{ playing ? 'Stop' : 'Start' }}
+      </Button>
       <!-- <Button class="ml-2">Tempo</Button> -->
       <Button class="ml-auto" @click.native="clearPattern">Clear</Button>
     </div>
@@ -73,37 +73,40 @@ export default {
       });
     },
 
+    start() {
+      this.playing = true;
+      Tone.Transport.start();
+      this.drums.start();
+    },
+
+    stop() {
+      this.playing = false;
+      Tone.Transport.pause();
+      this.drums.stop();
+    },
+
     togglePlayback() {
-      this.playing = !this.playing;
       if (this.playing) {
-        Tone.Transport.start();
-        this.drums.start();
+        this.stop();
       } else {
-        Tone.Transport.pause();
-        this.drums.stop();
+        this.start();
       }
     },
 
     clearPattern() {
+      this.stop();
       for (const lane of this.sequence) {
         for (const note of lane.notes) {
           note.on = false;
         }
       }
-      this.drums.clear();
     },
 
     toggleNote(note) {
-      console.log(
-        'toggling note',
-        note.lane,
-        note.offset,
-        note.on,
-        '=>',
-        !note.on
-      );
       note.on = !note.on;
-      this.drums.toggleNote(note);
+      if (note.on && Tone.Transport.state === 'stopped') {
+        this.drums.playNote(note);
+      }
     },
   },
 };
