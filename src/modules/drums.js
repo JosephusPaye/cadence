@@ -2,21 +2,23 @@ import Tone from 'tone';
 
 window.Tone = Tone;
 
-const defaultSamples = {
-  clap: '/samples/clap.ogg',
-  closedHat: '/samples/closed-hat.ogg',
-  kick: '/samples/kick.ogg',
-  openHat: '/samples/open-hat.ogg',
-  ride: '/samples/ride.ogg',
-  rim: '/samples/rim.ogg',
-  snare: '/samples/snare.ogg',
-  tom: '/samples/tom.ogg',
+const samplePacks = {
+  default: {
+    clap: '/samples/clap.ogg',
+    closedHat: '/samples/closed-hat.ogg',
+    kick: '/samples/kick.ogg',
+    openHat: '/samples/open-hat.ogg',
+    ride: '/samples/ride.ogg',
+    rim: '/samples/rim.ogg',
+    snare: '/samples/snare.ogg',
+    tom: '/samples/tom.ogg',
+  },
 };
 
 export class Drums {
-  constructor(lanes, onLoad) {
+  constructor(lanes, samplePack, onLoad) {
     this.initializeSequences(lanes);
-    this.initializePlayers(onLoad);
+    this.initializePlayers(samplePack, onLoad);
   }
 
   initializeSequences(lanes) {
@@ -26,9 +28,9 @@ export class Drums {
     });
   }
 
-  initializePlayers(onLoad) {
-    this.players = new Tone.Players(defaultSamples, onLoad).toMaster();
-    Object.keys(defaultSamples).forEach(sampleKey => {
+  initializePlayers(samplePack, onLoad) {
+    this.players = new Tone.Players(samplePacks[samplePack], onLoad).toMaster();
+    Object.keys(samplePacks[samplePack]).forEach(sampleKey => {
       this.players.get(sampleKey).retrigger = true;
     });
   }
@@ -46,11 +48,15 @@ export class Drums {
   }
 
   start() {
-    this.sequences.forEach(sequence => sequence.start());
+    for (const sequence of this.sequences.values()) {
+      sequence.start();
+    }
   }
 
   stop() {
-    this.sequences.forEach(sequence => sequence.stop());
+    for (const sequence of this.sequences.values()) {
+      sequence.stop();
+    }
     this.players.stopAll();
   }
 
@@ -59,11 +65,13 @@ export class Drums {
   }
 
   toggleLane(lane) {
-    this.sequences.get(lane.name).mute = !lane.enabled;
+    this.sequences.get(lane.name).mute = lane.enabled === false;
   }
 
   dispose() {
-    this.sequences.forEach(sequence => sequence.dispose());
+    for (const sequence of this.sequences.values()) {
+      sequence.dispose();
+    }
     this.players.dispose();
   }
 }

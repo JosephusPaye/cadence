@@ -2,9 +2,9 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">
-          {{ playing ? 'Stop' : 'Start' }}
-        </Button>
+        <Button @click="togglePlayback" color="primary">{{
+          playing ? 'Stop' : 'Start'
+        }}</Button>
         <Button
           class="ml-2"
           :toggled="headerControl === 'tempo'"
@@ -19,15 +19,15 @@
         >
         <Button class="ml-auto" @click="clearPattern">Clear</Button>
       </div>
-      <TempoControl v-model="tempo" v-if="headerControl === 'tempo'" />
+      <TempoControl v-model="beat.tempo" v-if="headerControl === 'tempo'" />
       <InstrumentsControl
         v-else-if="headerControl === 'instruments'"
-        :lanes="lanes"
+        :lanes="beat.lanes"
         @toggle="toggleLane"
       />
       <Grid
         class="mx-auto"
-        :lanes="lanes"
+        :lanes="beat.lanes"
         @toggle-note="toggleNote"
         @play-note="playNote"
       />
@@ -45,7 +45,7 @@
 import 'focus-visible';
 import Tone from 'tone';
 import { Drums } from './modules/drums';
-import { makeLanes, defaultBeat } from './modules/data';
+import { Beat, defaultBeat } from './modules/data';
 import Button from './components/Button.vue';
 import Grid from './components/Grid.vue';
 import TempoControl from './components/TempoControl.vue';
@@ -65,20 +65,35 @@ export default {
     return {
       loading: true,
       playing: false,
-      tempo: 120,
       headerControl: 'none',
-      lanes: makeLanes(defaultBeat),
+      beat: new Beat(defaultBeat),
+      unsaved: true,
     };
   },
 
   watch: {
-    tempo(newTempo) {
-      Tone.Transport.bpm.value = newTempo;
+    beat: {
+      handler() {
+        this.unsaved = true;
+      },
+      deep: true,
+    },
+    'beat.tempo': {
+      handler(newTempo) {
+        Tone.Transport.bpm.value = newTempo;
+      },
+      immediate: true,
+    },
+    'beat.title': {
+      handler(newTitle) {
+        document.title = newTitle + (this.unsaved ? ' *' : '') + ' – Doodoo';
+      },
+      immediate: true,
     },
   },
 
   created() {
-    this.drums = new Drums(this.lanes, () => {
+    this.drums = new Drums(this.beat.lanes, this.beat.samplePack, () => {
       this.loading = false;
     });
   },
@@ -118,15 +133,11 @@ export default {
 
     clearPattern() {
       this.stop();
-      for (const lane of this.lanes) {
-        for (const note of lane.notes) {
-          note.on = false;
-        }
-      }
+      this.beat.clear();
     },
 
     toggleNote(note) {
-      note.on = !note.on;
+      note.toggle();
       if (note.on && Tone.Transport.state !== 'started') {
         this.drums.playNote(note);
       }
@@ -145,7 +156,7 @@ export default {
     },
 
     toggleLane(lane) {
-      lane.enabled = !lane.enabled;
+      lane.toggle();
       this.drums.toggleLane(lane);
     },
   },
