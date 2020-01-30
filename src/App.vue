@@ -2,9 +2,9 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">{{
-          playing ? 'Stop' : 'Start'
-        }}</Button>
+        <Button @click="togglePlayback" color="primary">
+          {{ playing ? 'Stop' : 'Start' }}
+        </Button>
         <Button
           class="ml-2"
           :toggled="headerControl === 'tempo'"
@@ -25,7 +25,12 @@
         :lanes="lanes"
         @toggle="toggleLane"
       />
-      <Grid class="mx-auto" :lanes="lanes" @toggle-note="toggleNote" />
+      <Grid
+        class="mx-auto"
+        :lanes="lanes"
+        @toggle-note="toggleNote"
+        @play-note="playNote"
+      />
       <div
         v-if="loading"
         class="absolute left-0 top-0 w-full h-full bg-gray-700 opacity-75 text-white flex items-center justify-center text-xl"
@@ -125,6 +130,10 @@ export default {
       if (note.on && Tone.Transport.state !== 'started') {
         this.drums.playNote(note);
       }
+    },
+
+    playNote(note) {
+      this.drums.playNote(note);
     },
 
     toggleHeaderControl(control) {

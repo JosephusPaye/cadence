@@ -2,7 +2,7 @@
   <button
     class="w-12 h-8 inline-flex items-center justify-center cursor-pointer"
     :class="classes"
-    @click="toggle"
+    @mousedown="toggle"
   ></button>
 </template>
 

@@ -5,6 +5,7 @@
       :key="index"
       :lane="lane"
       :offset="index"
+      @play-note="playNote"
       @toggle-note="toggleNote"
     />
   </div>
@@ -31,6 +32,10 @@ export default {
   methods: {
     toggleNote(note) {
       this.$emit('toggle-note', note);
+    },
+
+    playNote(note) {
+      this.$emit('play-note', note);
     },
   },
 };

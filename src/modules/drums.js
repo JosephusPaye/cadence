@@ -2,6 +2,17 @@ import Tone from 'tone';
 
 window.Tone = Tone;
 
+const defaultSamples = {
+  clap: '/samples/clap.ogg',
+  closedHat: '/samples/closed-hat.ogg',
+  kick: '/samples/kick.ogg',
+  openHat: '/samples/open-hat.ogg',
+  ride: '/samples/ride.ogg',
+  rim: '/samples/rim.ogg',
+  snare: '/samples/snare.ogg',
+  tom: '/samples/tom.ogg',
+};
+
 export class Drums {
   constructor(lanes, onLoad) {
     this.initializeSequences(lanes);
@@ -16,19 +27,10 @@ export class Drums {
   }
 
   initializePlayers(onLoad) {
-    this.players = new Tone.Players(
-      {
-        clap: '/samples/clap.ogg',
-        closedHat: '/samples/closed-hat.ogg',
-        kick: '/samples/kick.ogg',
-        openHat: '/samples/open-hat.ogg',
-        ride: '/samples/ride.ogg',
-        rim: '/samples/rim.ogg',
-        snare: '/samples/snare.ogg',
-        tom: '/samples/tom.ogg',
-      },
-      onLoad
-    ).toMaster();
+    this.players = new Tone.Players(defaultSamples, onLoad).toMaster();
+    Object.keys(defaultSamples).forEach(sampleKey => {
+      this.players.get(sampleKey).retrigger = true;
+    });
   }
 
   makeSequence(lane) {
