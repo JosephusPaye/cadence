@@ -8,8 +8,10 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "clipboard": "^2.0.4",
     "core-js": "^3.4.4",
     "focus-visible": "^5.0.2",
+    "lodash.debounce": "^4.0.8",
     "tailwindcss": "^1.1.4",
     "tone": "^13.8.25",
     "vue": "^2.6.10",

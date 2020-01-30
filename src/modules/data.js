@@ -24,6 +24,17 @@ export const defaultBeat = {
   instruments: ['ride', 'openHat', 'closedHat', 'clap', 'snare', 'tom', 'kick'],
 };
 
+export function beatFromUrl() {
+  if (location.hash) {
+    try {
+      return new Beat(JSON.parse(atob(location.hash.slice(1))));
+    } catch {
+      // Let it fallback to default beat below
+    }
+  }
+  return new Beat(defaultBeat);
+}
+
 export class Note {
   constructor(lane, offset, on) {
     this.lane = lane;
@@ -76,11 +87,26 @@ export class Beat {
   }
 
   getData() {
+    const enabledLanes = this.lanes
+      .filter(lane => lane.enabled)
+      .map(lane => lane.name);
+
     return {
-      instruments: this.instruments,
-      samplePack: this.samplePack,
+      title: this.title,
       tempo: this.tempo,
+      samplePack: this.samplePack,
+      instruments: this.instruments.filter(instrument =>
+        enabledLanes.includes(instrument)
+      ),
       patterns: lanesToPatterns(this.lanes),
+    };
+  }
+
+  getUrl() {
+    const hash = this.toBase64();
+    return {
+      hash,
+      href: location.origin + '/#' + hash,
     };
   }
 

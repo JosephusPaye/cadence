@@ -3,6 +3,7 @@
     class="w-12 h-8 inline-flex items-center justify-center cursor-pointer"
     :class="classes"
     @mousedown="toggle"
+    @keydown.space="toggle"
   ></button>
 </template>
 

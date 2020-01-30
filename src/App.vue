@@ -2,9 +2,9 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">{{
-          playing ? 'Stop' : 'Start'
-        }}</Button>
+        <Button @click="togglePlayback" color="primary">
+          {{ playing ? 'Stop' : 'Start' }}
+        </Button>
         <Button
           class="ml-2"
           :toggled="headerControl === 'tempo'"
@@ -17,7 +17,15 @@
           @click="toggleHeaderControl('instruments')"
           >Instruments</Button
         >
-        <Button class="ml-auto" @click="clearPattern">Clear</Button>
+        <!--
+          <input v-model="beat.title" class="ml-auto w-32 px-3 py-1 bg-gray-700 text-black text-white" />
+          <Button>Save</Button>
+          <Button
+            class="ml-2"
+            :toggled="headerControl === 'tempo'"
+            @click="toggleHeaderControl('tempo')"
+          >Library</Button>
+        -->
       </div>
       <TempoControl v-model="beat.tempo" v-if="headerControl === 'tempo'" />
       <InstrumentsControl
@@ -31,6 +39,12 @@
         @toggle-note="toggleNote"
         @play-note="playNote"
       />
+      <div class="mt-2 w-full flex">
+        <Button ref="copyButton" :data-clipboard-text="beatUrl">{{
+          copyButtonLabel
+        }}</Button>
+        <Button class="ml-auto" @click="clearPattern">Clear</Button>
+      </div>
       <div
         v-if="loading"
         class="absolute left-0 top-0 w-full h-full bg-gray-700 opacity-75 text-white flex items-center justify-center text-xl"
@@ -43,13 +57,16 @@
 
 <script>
 import 'focus-visible';
+import Clipboard from 'clipboard';
+import debounce from 'lodash.debounce';
 import Tone from 'tone';
-import { Drums } from './modules/drums';
-import { Beat, defaultBeat } from './modules/data';
+
 import Button from './components/Button.vue';
 import Grid from './components/Grid.vue';
 import TempoControl from './components/TempoControl.vue';
 import InstrumentsControl from './components/InstrumentsControl.vue';
+import { Drums } from './modules/drums';
+import { beatFromUrl } from './modules/data';
 
 export default {
   name: 'app',
@@ -62,19 +79,23 @@ export default {
   },
 
   data() {
+    const beat = beatFromUrl();
     return {
       loading: true,
       playing: false,
       headerControl: 'none',
-      beat: new Beat(defaultBeat),
+      copyButtonLabel: 'Copy link',
+      beat,
+      beatUrl: beat.getUrl().href,
       unsaved: true,
     };
   },
 
   watch: {
     beat: {
-      handler() {
+      handler(beat) {
         this.unsaved = true;
+        this.onBeatChange(beat);
       },
       deep: true,
     },
@@ -86,7 +107,7 @@ export default {
     },
     'beat.title': {
       handler(newTitle) {
-        document.title = newTitle + (this.unsaved ? ' *' : '') + ' – Doodoo';
+        this.onTitleChange(newTitle);
       },
       immediate: true,
     },
@@ -95,6 +116,14 @@ export default {
   created() {
     this.drums = new Drums(this.beat.lanes, this.beat.samplePack, () => {
       this.loading = false;
+    });
+    this.onBeatChange = debounce(this.onBeatChange, 300, {
+      leading: true,
+      trailing: true,
+    });
+    this.onTitleChange = debounce(this.onTitleChange, 300, {
+      leading: true,
+      trailing: true,
     });
   },
 
@@ -108,6 +137,14 @@ export default {
       },
       { once: true }
     );
+
+    this.clipboard = new Clipboard(this.$refs.copyButton.$el);
+    this.clipboard.on('success', () => {
+      this.setCopyButtonLabel('Copied!');
+    });
+    this.clipboard.on('error', () => {
+      this.setCopyButtonLabel('Copy failed');
+    });
   },
 
   methods: {
@@ -129,11 +166,6 @@ export default {
       } else {
         this.start();
       }
-    },
-
-    clearPattern() {
-      this.stop();
-      this.beat.clear();
     },
 
     toggleNote(note) {
@@ -158,6 +190,33 @@ export default {
     toggleLane(lane) {
       lane.toggle();
       this.drums.toggleLane(lane);
+    },
+
+    onBeatChange(beat) {
+      const { href, hash } = beat.getUrl();
+      this.beatUrl = href;
+      location.hash = hash;
+    },
+
+    onTitleChange(title) {
+      document.title = title + (this.unsaved ? ' *' : '') + ' – Doodoo';
+    },
+
+    setCopyButtonLabel(label) {
+      this.copyButtonLabel = label;
+      if (this.copyButtonLabelTimeout) {
+        clearTimeout(this.copyButtonLabelTimeout);
+        this.copyButtonLabelTimeout = undefined;
+      }
+      this.copyButtonLabelTimeout = setTimeout(() => {
+        this.copyButtonLabel = 'Copy link';
+        this.copyButtonLabelTimeout = undefined;
+      }, 2000);
+    },
+
+    clearPattern() {
+      this.stop();
+      this.beat.clear();
     },
   },
 };

@@ -3,6 +3,7 @@
     <button
       class="w-32 h-8 inline-flex items-center justify-center cursor-pointer bg-gray-700 capitalize text-gray-400 active:bg-blue-400"
       @mousedown="playNote"
+      @keydown.space="playNote"
     >
       {{ lane.prettyName }}
     </button>
