@@ -1,22 +1,22 @@
 <template>
-  <Button
+  <FeedbackButton
     ref="button"
     :color="color"
     :toggled="toggled"
+    :label="label"
     :data-clipboard-text="content"
-    >{{ currentLabel }}</Button
-  >
+  />
 </template>
 
 <script>
 import Clipboard from 'clipboard';
-import Button from './Button.vue';
+import FeedbackButton from './FeedbackButton.vue';
 
 export default {
   name: 'copy-button',
 
   components: {
-    Button,
+    FeedbackButton,
   },
 
   props: {
@@ -26,19 +26,13 @@ export default {
     content: String,
   },
 
-  data() {
-    return {
-      currentLabel: this.label,
-    };
-  },
-
   mounted() {
     this.clipboard = new Clipboard(this.$refs.button.$el);
     this.clipboard.on('success', () => {
-      this.setLabel('Copied!');
+      this.$refs.button.setLabel('Copied!');
     });
     this.clipboard.on('error', () => {
-      this.setLabel('Copy failed');
+      this.$refs.button.setLabel('Copy failed');
     });
   },
 
@@ -46,26 +40,6 @@ export default {
     if (this.clipboard) {
       this.clipboard.destroy();
     }
-    if (this.labelTimeout) {
-      clearTimeout(this.labelTimeout);
-      this.labelTimeout = undefined;
-    }
-  },
-
-  methods: {
-    setLabel(label) {
-      this.currentLabel = label;
-
-      if (this.labelTimeout) {
-        clearTimeout(this.labelTimeout);
-        this.labelTimeout = undefined;
-      }
-
-      this.labelTimeout = setTimeout(() => {
-        this.currentLabel = 'Copy link';
-        this.labelTimeout = undefined;
-      }, 2000);
-    },
   },
 };
 </script>
