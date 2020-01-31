@@ -2,19 +2,19 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">
-          {{ playing ? 'Stop' : 'Start' }}
-        </Button>
+        <Button @click="togglePlayback" color="primary">{{
+          playing ? 'Stop' : 'Start'
+        }}</Button>
         <Button
           class="ml-2"
-          :toggled="headerControl === 'tempo'"
-          @click="toggleHeaderControl('tempo')"
+          :toggled="headerComponent === 'tempo'"
+          @click="toggleHeader('tempo')"
           >Tempo</Button
         >
         <Button
           class="ml-2"
-          :toggled="headerControl === 'instruments'"
-          @click="toggleHeaderControl('instruments')"
+          :toggled="headerComponent === 'instruments'"
+          @click="toggleHeader('instruments')"
           >Instruments</Button
         >
         <!--
@@ -22,14 +22,14 @@
           <Button>Save</Button>
           <Button
             class="ml-2"
-            :toggled="headerControl === 'tempo'"
-            @click="toggleHeaderControl('tempo')"
+            :toggled="headerComponent === 'tempo'"
+            @click="toggleHeader('tempo')"
           >Library</Button>
         -->
       </div>
-      <TempoControl v-model="beat.tempo" v-if="headerControl === 'tempo'" />
+      <TempoControl v-model="beat.tempo" v-if="headerComponent === 'tempo'" />
       <InstrumentsControl
-        v-else-if="headerControl === 'instruments'"
+        v-else-if="headerComponent === 'instruments'"
         :lanes="beat.lanes"
         @toggle="toggleLane"
       />
@@ -40,9 +40,9 @@
         @play-note="playNote"
       />
       <div class="mt-2 w-full flex">
-        <Button ref="copyButton" :data-clipboard-text="beatUrl">{{
-          copyButtonLabel
-        }}</Button>
+        <Button ref="copyButton" :data-clipboard-text="beatUrl">
+          {{ copyButtonLabel }}
+        </Button>
         <Button class="ml-auto" @click="clearPattern">Clear</Button>
       </div>
       <div
@@ -56,17 +56,16 @@
 </template>
 
 <script>
-import 'focus-visible';
 import Clipboard from 'clipboard';
 import debounce from 'lodash.debounce';
 import Tone from 'tone';
 
+import { beatFromUrl } from './modules/beat';
+import { Drums } from './modules/drums';
 import Button from './components/Button.vue';
 import Grid from './components/Grid.vue';
-import TempoControl from './components/TempoControl.vue';
 import InstrumentsControl from './components/InstrumentsControl.vue';
-import { Drums } from './modules/drums';
-import { beatFromUrl } from './modules/data';
+import TempoControl from './components/TempoControl.vue';
 
 export default {
   name: 'app',
@@ -83,11 +82,11 @@ export default {
     return {
       loading: true,
       playing: false,
-      headerControl: 'none',
+      headerComponent: 'none',
       copyButtonLabel: 'Copy link',
       beat,
       beatUrl: beat.getUrl().href,
-      unsaved: true,
+      unsaved: false,
     };
   },
 
@@ -179,11 +178,11 @@ export default {
       this.drums.playNote(note);
     },
 
-    toggleHeaderControl(control) {
-      if (this.headerControl === control) {
-        this.headerControl = 'none';
+    toggleHeader(control) {
+      if (this.headerComponent === control) {
+        this.headerComponent = 'none';
       } else {
-        this.headerControl = control;
+        this.headerComponent = control;
       }
     },
 

@@ -24,7 +24,9 @@ export class Drums {
   initializeSequences(lanes) {
     this.sequences = new Map();
     lanes.forEach(lane => {
-      this.sequences.set(lane.name, this.makeSequence(lane));
+      const sequence = this.makeSequence(lane);
+      sequence.mute = lane.enabled === false;
+      this.sequences.set(lane.name, sequence);
     });
   }
 

@@ -1,3 +1,4 @@
+import 'focus-visible';
 import Vue from 'vue';
 import App from './App.vue';
 
