@@ -2,7 +2,7 @@
 
 🥁 Create and share drum patterns and sequences in the browser! <https://focused-galileo-7aaf5d.netlify.com>
 
-![Promotional screenshot of Cadence app](./screenshot.png)
+[![Promotional screenshot of Cadence app](./screenshot.png)](https://focused-galileo-7aaf5d.netlify.com)
 
 This project is part of [#CreateWeekly](https://dev.to/josephuspaye/createweekly-create-something-new-publicly-every-week-in-2020-1nh9), my attempt to create something new publicly every week in 2020.
 
