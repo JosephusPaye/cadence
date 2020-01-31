@@ -30,6 +30,7 @@ export default {
 <style lang="scss" scoped>
 .range-slider {
   @apply appearance-none bg-transparent w-full m-0 cursor-pointer;
+  height: 20px;
 
   &::-webkit-slider-runnable-track {
     @apply w-full rounded-none bg-blue-400;
@@ -52,6 +53,18 @@ export default {
     @apply rounded-full border-0 bg-white;
     height: 20px;
     width: 20px;
+  }
+
+  &::-ms-track {
+    @apply w-full rounded-none bg-blue-400;
+    height: 5px;
+  }
+
+  &::-ms-thumb {
+    @apply rounded-full appearance-none bg-white;
+    height: 20px;
+    width: 20px;
+    margin-top: 0;
   }
 }
 </style>
