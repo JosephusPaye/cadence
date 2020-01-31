@@ -2,18 +2,18 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">{{
-          playing ? 'Stop' : 'Start'
-        }}</Button>
+        <Button @click="togglePlayback" color="primary">
+          {{ playing ? 'Stop' : 'Start' }}
+        </Button>
         <Button
           class="ml-2"
-          :toggled="headerComponent === 'tempo'"
+          :toggled="header === 'tempo'"
           @click="toggleHeader('tempo')"
           >Tempo</Button
         >
         <Button
           class="ml-2"
-          :toggled="headerComponent === 'instruments'"
+          :toggled="header === 'instruments'"
           @click="toggleHeader('instruments')"
           >Instruments</Button
         >
@@ -22,14 +22,14 @@
           <Button>Save</Button>
           <Button
             class="ml-2"
-            :toggled="headerComponent === 'tempo'"
+            :toggled="header === 'tempo'"
             @click="toggleHeader('tempo')"
           >Library</Button>
         -->
       </div>
-      <TempoControl v-model="beat.tempo" v-if="headerComponent === 'tempo'" />
+      <TempoControl v-model="beat.tempo" v-if="header === 'tempo'" />
       <InstrumentsControl
-        v-else-if="headerComponent === 'instruments'"
+        v-else-if="header === 'instruments'"
         :lanes="beat.lanes"
         @toggle="toggleLane"
       />
@@ -40,9 +40,7 @@
         @play-note="playNote"
       />
       <div class="mt-2 w-full flex">
-        <Button ref="copyButton" :data-clipboard-text="beatUrl">
-          {{ copyButtonLabel }}
-        </Button>
+        <CopyButton label="Copy link" :content="beatUrl" />
         <Button class="ml-auto" @click="clearPattern">Clear</Button>
       </div>
       <div
@@ -56,13 +54,13 @@
 </template>
 
 <script>
-import Clipboard from 'clipboard';
 import debounce from 'lodash.debounce';
 import Tone from 'tone';
 
 import { beatFromUrl } from './modules/beat';
 import { Drums } from './modules/drums';
 import Button from './components/Button.vue';
+import CopyButton from './components/CopyButton.vue';
 import Grid from './components/Grid.vue';
 import InstrumentsControl from './components/InstrumentsControl.vue';
 import TempoControl from './components/TempoControl.vue';
@@ -72,6 +70,7 @@ export default {
 
   components: {
     Button,
+    CopyButton,
     Grid,
     InstrumentsControl,
     TempoControl,
@@ -82,11 +81,10 @@ export default {
     return {
       loading: true,
       playing: false,
-      headerComponent: 'none',
-      copyButtonLabel: 'Copy link',
+      unsaved: false,
+      header: 'none',
       beat,
       beatUrl: beat.getUrl().href,
-      unsaved: false,
     };
   },
 
@@ -136,14 +134,6 @@ export default {
       },
       { once: true }
     );
-
-    this.clipboard = new Clipboard(this.$refs.copyButton.$el);
-    this.clipboard.on('success', () => {
-      this.setCopyButtonLabel('Copied!');
-    });
-    this.clipboard.on('error', () => {
-      this.setCopyButtonLabel('Copy failed');
-    });
   },
 
   methods: {
@@ -179,10 +169,10 @@ export default {
     },
 
     toggleHeader(control) {
-      if (this.headerComponent === control) {
-        this.headerComponent = 'none';
+      if (this.header === control) {
+        this.header = 'none';
       } else {
-        this.headerComponent = control;
+        this.header = control;
       }
     },
 
@@ -199,18 +189,6 @@ export default {
 
     onTitleChange(title) {
       document.title = title + (this.unsaved ? ' *' : '') + ' – Doodoo';
-    },
-
-    setCopyButtonLabel(label) {
-      this.copyButtonLabel = label;
-      if (this.copyButtonLabelTimeout) {
-        clearTimeout(this.copyButtonLabelTimeout);
-        this.copyButtonLabelTimeout = undefined;
-      }
-      this.copyButtonLabelTimeout = setTimeout(() => {
-        this.copyButtonLabel = 'Copy link';
-        this.copyButtonLabelTimeout = undefined;
-      }, 2000);
     },
 
     clearPattern() {
