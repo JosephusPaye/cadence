@@ -11,30 +11,6 @@ const allInstruments = [
   'kick',
 ];
 
-export const defaultBeat = {
-  title: 'Untitled beat',
-  tempo: 120,
-  samplePack: 'default',
-  patterns: {
-    ride: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    snare: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    tom: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    kick: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-  },
-  instruments: ['ride', 'openHat', 'closedHat', 'clap', 'snare', 'tom', 'kick'],
-};
-
-export function beatFromUrl() {
-  if (location.hash) {
-    try {
-      return new Beat(JSON.parse(atob(location.hash.slice(1))));
-    } catch {
-      // Let it fallback to default beat below
-    }
-  }
-  return new Beat(defaultBeat);
-}
-
 export class Note {
   constructor(lane, offset, on) {
     this.lane = lane;
@@ -86,6 +62,10 @@ export class Beat {
     }
   }
 
+  clone() {
+    return new Beat(JSON.parse(JSON.stringify(this.getData())));
+  }
+
   getData() {
     const enabledLanes = this.lanes
       .filter(lane => lane.enabled)
@@ -119,6 +99,30 @@ export class Beat {
     const data = JSON.parse(atob(string));
     return new Beat(data);
   }
+}
+
+export const defaultBeat = new Beat({
+  title: 'Untitled beat',
+  tempo: 120,
+  samplePack: 'default',
+  patterns: {
+    ride: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    snare: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    tom: [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    kick: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+  },
+  instruments: ['ride', 'openHat', 'closedHat', 'clap', 'snare', 'tom', 'kick'],
+});
+
+export function beatFromUrl(fallback) {
+  if (location.hash) {
+    try {
+      return new Beat(JSON.parse(atob(location.hash.slice(1))));
+    } catch {
+      // Let it fallback to default beat below
+    }
+  }
+  return fallback;
 }
 
 function blankPatterns() {

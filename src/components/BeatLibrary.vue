@@ -3,29 +3,33 @@
     <div
       class="w-32 h-8 inline-flex items-center cursor-default px-1 text-gray-400"
     >
-      Instruments
+      Beat library
     </div>
     <div class="ml-2 flex-grow flex items-center">
       <button
         class="px-3 h-8 inline-flex flex-shrink-0 items-center justify-center capitalize cursor-pointer mr-1"
         :class="
-          instrument.enabled ? 'bg-blue-400' : 'bg-gray-700 text-gray-300'
+          currentBeat === beat ? 'bg-blue-400' : 'bg-gray-700 text-gray-300'
         "
-        v-for="instrument in lanes"
-        :key="instrument.name"
-        @click="$emit('toggle', instrument)"
+        v-for="beat in beats"
+        :key="beat"
+        @click="$emit('select', beat)"
       >
-        {{ instrument.prettyName }}
+        {{ beat }}
       </button>
+      <div class="text-gray-500 italic" v-if="beats.length === 0">
+        No saved beats yet. Save beats to see them here.
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'instruments-control',
+  name: 'beat-library',
   props: {
-    lanes: Array,
+    currentBeat: String,
+    beats: Array,
   },
 };
 </script>

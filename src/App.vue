@@ -2,9 +2,9 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">
-          {{ playing ? 'Stop' : 'Start' }}
-        </Button>
+        <Button @click="togglePlayback" color="primary">{{
+          playing ? 'Stop' : 'Start'
+        }}</Button>
         <Button
           class="ml-2"
           :toggled="header === 'tempo'"
@@ -17,21 +17,29 @@
           @click="toggleHeader('instruments')"
           >Instruments</Button
         >
-        <!--
-          <input v-model="beat.title" class="ml-auto w-32 px-3 py-1 bg-gray-700 text-black text-white" />
-          <Button>Save</Button>
-          <Button
-            class="ml-2"
-            :toggled="header === 'tempo'"
-            @click="toggleHeader('tempo')"
-          >Library</Button>
-        -->
+        <input
+          v-model="beat.title"
+          class="ml-auto w-32 px-3 py-1 bg-gray-700 text-black text-white"
+        />
+        <FeedbackButton ref="feedbackButton" label="Save" @click="saveBeat" />
+        <Button
+          class="ml-2"
+          :toggled="header === 'library'"
+          @click="toggleHeader('library')"
+          >Library</Button
+        >
       </div>
       <TempoControl v-model="beat.tempo" v-if="header === 'tempo'" />
       <InstrumentsControl
         v-else-if="header === 'instruments'"
         :lanes="beat.lanes"
         @toggle="toggleLane"
+      />
+      <BeatLibrary
+        v-else-if="header === 'library'"
+        :beats="savedBeatTitles"
+        :current-beat="beat.title"
+        @select="loadSavedBeat"
       />
       <Grid
         class="mx-auto"
@@ -57,12 +65,15 @@
 import debounce from 'lodash.debounce';
 import Tone from 'tone';
 
-import { beatFromUrl } from './modules/beat';
+import { defaultBeat, beatFromUrl } from './modules/beat';
 import { Drums } from './modules/drums';
+import * as storage from './modules/storage';
 import Button from './components/Button.vue';
 import CopyButton from './components/CopyButton.vue';
+import FeedbackButton from './components/FeedbackButton.vue';
 import Grid from './components/Grid.vue';
 import InstrumentsControl from './components/InstrumentsControl.vue';
+import BeatLibrary from './components/BeatLibrary.vue';
 import TempoControl from './components/TempoControl.vue';
 
 export default {
@@ -71,30 +82,31 @@ export default {
   components: {
     Button,
     CopyButton,
+    FeedbackButton,
     Grid,
     InstrumentsControl,
+    BeatLibrary,
     TempoControl,
   },
 
   data() {
-    const beat = beatFromUrl();
     return {
       loading: true,
       playing: false,
-      unsaved: false,
       header: 'none',
-      beat,
-      beatUrl: beat.getUrl().href,
+      savedBeatTitles: storage.getSavedBeatTitles(),
+      beat: beatFromUrl(storage.getLastOpenBeat(defaultBeat)),
+      beatUrl: '',
     };
   },
 
   watch: {
     beat: {
       handler(beat) {
-        this.unsaved = true;
         this.onBeatChange(beat);
       },
       deep: true,
+      immediate: true,
     },
     'beat.tempo': {
       handler(newTempo) {
@@ -185,10 +197,26 @@ export default {
       const { href, hash } = beat.getUrl();
       this.beatUrl = href;
       location.hash = hash;
+      storage.setLastOpenBeat(beat);
     },
 
     onTitleChange(title) {
-      document.title = title + (this.unsaved ? ' *' : '') + ' – Doodoo';
+      document.title = title + ' – Doodoo';
+    },
+
+    saveBeat() {
+      storage.saveBeat(this.beat);
+      this.savedBeatTitles = storage.getSavedBeatTitles();
+      this.$refs.feedbackButton.setLabel('Saved!');
+    },
+
+    loadSavedBeat(title) {
+      this.stop();
+      this.loading = true;
+      this.beat = storage.loadBeat(title, this.beat);
+      this.drums = new Drums(this.beat.lanes, this.beat.samplePack, () => {
+        this.loading = false;
+      });
     },
 
     clearPattern() {
