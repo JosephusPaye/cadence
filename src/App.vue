@@ -2,9 +2,9 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">{{
-          playing ? 'Stop' : 'Start'
-        }}</Button>
+        <Button @click="togglePlayback" color="primary">
+          {{ playing ? 'Stop' : 'Start' }}
+        </Button>
         <Button
           class="ml-2"
           :toggled="header === 'tempo'"
@@ -56,6 +56,31 @@
         class="absolute left-0 top-0 w-full h-full bg-gray-700 opacity-75 text-white flex items-center justify-center text-xl"
       >
         Loading...
+      </div>
+      <div class="text-center mt-24 pt-4 text-gray-700 text-sm">
+        Created by
+        <a
+          class="underline hover:text-gray-500 focus:text-gray-400"
+          href="https://twitter.com/JosephusPaye"
+          target="_blank"
+          rel="noopener"
+          >Josephus Paye II</a
+        >
+        for
+        <a
+          class="underline hover:text-gray-500 focus:text-gray-400"
+          href="https://twitter.com/JosephusPaye/status/1214853295023411200"
+          target="_blank"
+          rel="noopener"
+          >#CreateWeekly</a
+        >. View on
+        <a
+          class="underline hover:text-gray-500 focus:text-gray-400"
+          href="https://github.com/JosephusPaye/cadence"
+          target="_blank"
+          rel="noopener"
+          >Github</a
+        >.
       </div>
     </div>
   </div>
