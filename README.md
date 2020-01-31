@@ -1,6 +1,6 @@
 # Cadence
 
-🥁 Create and share beat patterns and sequences in the browser! <https://focused-galileo-7aaf5d.netlify.com>
+🥁 Create and share drum patterns and sequences in the browser! <https://focused-galileo-7aaf5d.netlify.com>
 
 This project is part of [#CreateWeekly](https://dev.to/josephuspaye/createweekly-create-something-new-publicly-every-week-in-2020-1nh9), my attempt to create something new publicly every week in 2020.
 
@@ -8,10 +8,10 @@ This project is part of [#CreateWeekly](https://dev.to/josephuspaye/createweekly
 
 Cadence allows you to:
 
-- Create 16-note beat patterns using 8 drum instruments: Ride, Open Hat, Closed Hat, Rim, Clap, Snare, Tom and Kick
+- Create 16-note drum patterns using 8 drum instruments: Ride, Open Hat, Closed Hat, Rim, Clap, Snare, Tom and Kick
 - Set the beat tempo anywhere between 30bpm and 240bpm
 - Save multiple beats locally in your browser
-- Share your beats with others, using a unique URL
+- Easily share your beats with others using a unique URL
 
 Cadence uses [Tone.js](https://tonejs.github.io/) to access the [Web Audio API](https://webaudio.github.io/web-audio-api/).
 
