@@ -2,9 +2,9 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">
-          {{ playing ? 'Stop' : 'Start' }}
-        </Button>
+        <Button @click="togglePlayback" color="primary">{{
+          playing ? 'Stop' : 'Start'
+        }}</Button>
         <Button
           class="ml-2"
           :toggled="header === 'tempo'"
@@ -226,7 +226,7 @@ export default {
     },
 
     onTitleChange(title) {
-      document.title = title + ' – Doodoo';
+      document.title = title + ' – Cadence';
     },
 
     saveBeat() {
