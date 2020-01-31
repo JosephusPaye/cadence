@@ -2,9 +2,9 @@
   <div id="app">
     <div class="relative mx-auto" style="max-width: 993px">
       <div class="flex mb-2">
-        <Button @click="togglePlayback" color="primary">{{
-          playing ? 'Stop' : 'Start'
-        }}</Button>
+        <Button @click="togglePlayback" color="primary">
+          {{ playing ? 'Stop' : 'Start' }}
+        </Button>
         <Button
           class="ml-2"
           :toggled="header === 'tempo'"
@@ -57,6 +57,8 @@
       >
         Loading...
       </div>
+    </div>
+    <div class="mx-auto">
       <div class="text-center mt-24 pt-4 text-gray-700 text-sm">
         Created by
         <a
